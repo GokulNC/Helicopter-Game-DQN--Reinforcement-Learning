@@ -1,5 +1,5 @@
 import math
-import sys
+import sys, os
 
 #import .base
 from .base.pygamewrapper import PyGameWrapper
@@ -16,8 +16,8 @@ class Block(pygame.sprite.Sprite):
 
         self.pos = vec2d(pos_init)
 
-        self.width = int(SCREEN_WIDTH * 0.1)
-        self.height = int(SCREEN_HEIGHT * 0.2)
+        self.width = int(SCREEN_WIDTH * 0.07)
+        self.height = int(SCREEN_HEIGHT * 0.1)
         self.speed = speed
 
         self.SCREEN_WIDTH = SCREEN_WIDTH
@@ -46,7 +46,7 @@ class Block(pygame.sprite.Sprite):
 
 class HelicopterPlayer(pygame.sprite.Sprite):
 
-    def __init__(self, speed, SCREEN_WIDTH, SCREEN_HEIGHT):
+    def __init__(self, speed, SCREEN_WIDTH, SCREEN_HEIGHT, _asset_dir):
         pygame.sprite.Sprite.__init__(self)
 
         pos_init = (int(SCREEN_WIDTH * 0.35), SCREEN_HEIGHT / 2)
@@ -56,21 +56,24 @@ class HelicopterPlayer(pygame.sprite.Sprite):
         self.fall_speed = speed * 0.09  # 0.0019
         self.momentum = 0
 
-        self.width = SCREEN_WIDTH * 0.05
+        self.width = SCREEN_WIDTH * 0.1
         self.height = SCREEN_HEIGHT * 0.05
+        
+        heli_sprite_path = os.path.join(_asset_dir, "heli.png")
+        self.image = pygame.image.load(heli_sprite_path).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.width), int(self.height)))
+        #image = pygame.Surface((self.width, self.height))
+        #image.fill((0, 0, 0, 0))
+        #image.set_colorkey((0, 0, 0))
 
-        image = pygame.Surface((self.width, self.height))
-        image.fill((0, 0, 0, 0))
-        image.set_colorkey((0, 0, 0))
+        #pygame.draw.rect(
+        #    image,
+        #    (255, 255, 255),
+        #    (0, 0, self.width, self.height),
+        #    0
+        #)
 
-        pygame.draw.rect(
-            image,
-            (255, 255, 255),
-            (0, 0, self.width, self.height),
-            0
-        )
-
-        self.image = image
+        #self.image = image
         self.rect = self.image.get_rect()
         self.rect.center = pos_init
 
@@ -143,6 +146,9 @@ class Pixelcopter(PyGameWrapper):
 
         self.is_climbing = False
         self.speed = 0.0004 * width
+        
+        self._dir_ = os.path.dirname(os.path.abspath(__file__))
+        self._asset_dir = os.path.join(self._dir_, "assets/")
 
     def _handle_player_events(self):
         self.is_climbing = False
@@ -218,7 +224,8 @@ class Pixelcopter(PyGameWrapper):
         self.player = HelicopterPlayer(
             self.speed,
             self.width,
-            self.height
+            self.height,
+            self._asset_dir
         )
 
         self.player_group = pygame.sprite.Group()
